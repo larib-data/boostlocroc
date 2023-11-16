@@ -74,8 +74,6 @@ def create_validation_set(dataset):
         random_state=42,
     )
 
-    return X_train, X_test, y_train, y_test, X_validation, y_validation
-
 
 def raw_segmentation(raw, epochs_duration, shift):
     """
@@ -122,7 +120,8 @@ def raw_segmentation(raw, epochs_duration, shift):
 
 def smooth_psd(epochs, n_fft, n_overlap, num_features):
     """
-    Compute the power spectral density (PSD) using Welch’s method for each epochs. Apply a Savitzky-Golay filter to the psd compute for each epochs.
+    Compute the power spectral density (PSD) using Welch method for each epochs.
+    Apply a Savitzky-Golay filter to the PSD computed for each epochs.
 
     Parameters
     ----------

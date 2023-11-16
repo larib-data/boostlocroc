@@ -15,7 +15,8 @@ conda env create -n loc-roc --file environment.yml
 ```
 
 ## Quickstart
-See `quickstart.ipynb`.
+See `quickstart.ipynb` on how to load the trained model and apply it to your data. Expected data type is .fif. Useful functions for this task are in the `boost-loc-roc` folder. \
+The `boost-loc-roc/utils/` folder contains code which is not needed for off-the-shelf use, but could be helpful in case you try to train your own model.
 
 ## Citing this work
 If this package was useful to you, please cite it: \
