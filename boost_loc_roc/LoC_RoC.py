@@ -44,8 +44,14 @@ def define_option(subsampling, weighted, binary):
     return res
 
 
-def extract_loc_roc(raw):
-    """Extract the LOC and ROC from raw EEG data. (MAIN FUNCTION)"""
+def extract_loc_roc(
+    raw: mne.io.Raw
+) -> tuple[np.float64, np.float64, np.ndarray, np.ndarray]:
+    """
+    Extract the LOC and ROC from raw EEG data. (MAIN FUNCTION)
+    
+    Return LoC and RoC times in second (from the beginning of the operation)
+    """
     n_splits = 3
     subsampling = False # subsampling option
     weighted = True # Weighted option 
@@ -70,12 +76,14 @@ def extract_loc_roc(raw):
     num_features=50
 
     
-    input_samples = compute_input_sample(raw, 
-                                     epochs_duration, 
-                                     shift, 
-                                     n_fft, 
-                                     n_overlap,
-                                     num_features)
+    input_samples = compute_input_sample(
+        raw, 
+        epochs_duration, 
+        shift, 
+        n_fft, 
+        n_overlap,
+        num_features
+    )
 
     probability = voting_ensemble_model.predict_proba(input_samples)
     probability = smooth_probability(probability)

@@ -75,7 +75,11 @@ def create_validation_set(dataset):
     )
 
 
-def raw_segmentation(raw, epochs_duration, shift):
+def raw_segmentation(
+    raw: mne.io.Raw,  
+    epochs_duration: int, 
+    shift: int,
+) -> mne.Epochs:
     """
     Create epochs in order to segment the raw signal.
 
@@ -112,13 +116,19 @@ def raw_segmentation(raw, epochs_duration, shift):
         baseline=None,
         reject=None,
         preload=True,
+        flat={"eeg": 1e-7}, # remove epochs with signal amplitude between [-0.1;0.1] uV
         decim=1,
         verbose=False,
     )
     return epochs
 
 
-def smooth_psd(epochs, n_fft, n_overlap, num_features):
+def smooth_psd(
+    epochs: mne.Epochs, 
+    n_fft: int, 
+    n_overlap: int, 
+    num_features:int
+) -> np.ndarray:
     """
     Compute the power spectral density (PSD) using Welch method for each epochs.
     Apply a Savitzky-Golay filter to the PSD computed for each epochs.
@@ -137,8 +147,9 @@ def smooth_psd(epochs, n_fft, n_overlap, num_features):
     ------
      Smooth_psd : ndarray, shape(n_epochs, smooth_psd)
     """
-    psd, freqs = mne.time_frequency.psd_welch(
-        epochs,
+    psd, freqs = mne.time_frequency.psd_array_welch(
+        epochs.get_data(),
+        sfreq=63,
         fmin=0,
         fmax=30,
         n_fft=n_fft,
@@ -191,7 +202,14 @@ def __tanh_soft(x, a, x0):
     return (np.tanh(a * (x - x0)) + 1) / 2
 
 
-def compute_input_sample(raw, epochs_duration, shift, n_fft, n_overlap, num_features):
+def compute_input_sample(
+    raw: mne.io.Raw, 
+    epochs_duration: int, 
+    shift: int, 
+    n_fft: int,
+    n_overlap: int,
+    num_features: int
+) -> pd.DataFrame:
     """
     Transform the raw signal into sequential psd.
 
