@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import mne
@@ -33,14 +32,14 @@ def objective_ROC(x, a, x0):
 
 
 def define_option(subsampling, weighted, binary):
-    res ="--"
+    res = "--"
     if subsampling:
         res += "s"
     if weighted:
         res += "w"
     if binary:
         res += "b"
-    res+="--"
+    res += "--"
     return res
 
 
@@ -49,38 +48,35 @@ def extract_loc_roc(
 ) -> tuple[np.float64, np.float64, np.ndarray, np.ndarray]:
     """
     Extract the LOC and ROC from raw EEG data. (MAIN FUNCTION)
-    
+
     Return LoC and RoC times in second (from the beginning of the operation)
     """
     n_splits = 3
-    subsampling = False # subsampling option
-    weighted = True # Weighted option 
-    binary = False # True = 2 labels / False = 3 labels
+    subsampling = False  # subsampling option
+    weighted = True  # Weighted option
+    binary = False  # True = 2 labels / False = 3 labels
     seed = 42
-    metrics_each_models = False
-    precision = 40
 
     option = define_option(subsampling, weighted, binary)
 
     cross_val_pathname = f"cross_val_weights_{seed}_{option}"
     weights_dir = "boost_loc_roc/model_weights/"
-    models = get_models(weights_dir,cross_val_pathname, n_splits)
-    
+    models = get_models(weights_dir, cross_val_pathname, n_splits)
+
     voting_ensemble_model = create_voting_ensemble_model(models, weights_dir)
     # print(voting_ensemble_model)
-    
-    epochs_duration=30
-    shift=30
-    n_fft=512
-    n_overlap=128
-    num_features=50
 
-    
+    epochs_duration = 30
+    shift = 30
+    n_fft = 512
+    n_overlap = 128
+    num_features = 50
+
     input_samples = compute_input_sample(
-        raw, 
-        epochs_duration, 
-        shift, 
-        n_fft, 
+        raw,
+        epochs_duration,
+        shift,
+        n_fft,
         n_overlap,
         num_features
     )
@@ -88,7 +84,7 @@ def extract_loc_roc(
     probability = voting_ensemble_model.predict_proba(input_samples)
     probability = smooth_probability(probability)
 
-     # Time
+    # Time
     L = len(probability)
     t = np.linspace(0, L * epochs_duration, L)
 
@@ -100,7 +96,7 @@ def extract_loc_roc(
         f_scale=0.1,
         args=(t[t < 110 * 60],
               probability[t < 110 * 60],
-             ),
+              ),
         bounds=([0.01, 0.5], [5, 110 * 60]),
     )
     time_loc = res_robust_LOC.x[1]
@@ -140,35 +136,35 @@ def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba):
     ax0 = fig.add_subplot(gs[0])
     ax1 = fig.add_subplot(gs[1], sharex=ax0)
     ax2 = fig.add_subplot(gs[2], sharex=ax0)
-    
+
     ax = [ax0, ax1, ax2]
     ax[0].axvline(x=time_loc, color='r', linestyle='--', linewidth=3)
     ax[0].axvline(x=time_roc, color='r', linestyle='--', linewidth=3)
-    
-    nperseg = np.floor(1.5*Fs).squeeze() 
-    noverlap = np.floor(nperseg/3).squeeze() 
-    
+
+    nperseg = np.floor(1.5*Fs).squeeze()
+    noverlap = np.floor(nperseg/3).squeeze()
+
     pxx, freqs, bins, im = ax[0].specgram(
-        signal, 
-        Fs = Fs, 
-        NFFT = int(nperseg),
+        signal,
+        Fs=Fs,
+        NFFT=int(nperseg),
         # window= np.hamming,
-        mode= 'psd',
-        cmap= 'jet',
-        noverlap = int(noverlap))
-    
-    im.set_clim(-20,25)
+        mode='psd',
+        cmap='jet',
+        noverlap=int(noverlap))
+
+    im.set_clim(-20, 25)
 
     ax[1].plot(time, signal)
     ax[1].axvline(x=time_loc, color='r', linestyle='--', linewidth=3)
     ax[1].axvline(x=time_roc, color='r', linestyle='--', linewidth=3)
-    
+
     ax[2].scatter(t_proba, proba)
     ax[2].set_xlabel('Time')
     ax[2].set_ylabel('Proba')
     plt.show()
-    
-    
+
+
 def Truncate_fif(raw, electrode=1):
     """Remove data from a Raw object where the signal is between -0.1 and 0.1 uV."""
 
@@ -188,7 +184,8 @@ def Truncate_fif(raw, electrode=1):
     # data[:, ~mask2] = 0
     data = data[:, mask2]
     ch_types = [mne.io.pick.channel_type(raw.info, idx) for idx in range(raw.info['nchan'])]
-    
-    info = mne.create_info(ch_names=raw.info['ch_names'], sfreq=raw.info['sfreq'], ch_types=ch_types)
+
+    info = mne.create_info(ch_names=raw.info['ch_names'],
+                           sfreq=raw.info['sfreq'], ch_types=ch_types)
 
     return mne.io.RawArray(data, info)

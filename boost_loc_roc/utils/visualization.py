@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from matplotlib.pylab import rcParams
 
-sfreq =  63
+sfreq = 63
 
 params = {
     "figure.figsize": (20, 5),
@@ -29,6 +29,7 @@ params = {
 }
 
 rcParams.update(params)
+
 
 def get_band_signal(
     raw,
@@ -131,7 +132,7 @@ def plot_eeg(df, raw, low_f, high_f, y_true, y_pred, ax=None, display_target=Tru
     set_ax_setting(ax, df.index[0], df.index[-1])
     add_ax_vlines(ax, y_true, y_pred, display_target)
 
-############################
+
 def set_ax_setting(ax, min_x, max_x, ylim=(-30, 30), step=250, labelrotation=45):
     """Visualisation tool."""
     ax.set_xticks(np.arange(min_x, max_x, step))
@@ -140,23 +141,25 @@ def set_ax_setting(ax, min_x, max_x, ylim=(-30, 30), step=250, labelrotation=45)
 
     if ylim is not None:
         ax.set_ylim(ylim[0], ylim[1])
-        
-def plot_proba (proba_raw, proba_smooth, bedstay):
+
+
+def plot_proba(proba_raw, proba_smooth, bedstay):
     fig, ax = plt.subplots()
-    ax.plot(proba_smooth, label = 'smooth probability')
-    ax.plot(proba_raw, label = 'voting ensemble model probabilities')
-    ax.legend(loc = 'center')
+    ax.plot(proba_smooth, label='smooth probability')
+    ax.plot(proba_raw, label='voting ensemble model probabilities')
+    ax.legend(loc='center')
     ax.set_title(
         f"Voting ensemble probabilities of Loc & ROC for the patient {bedstay}"
     )
     plt.show()
+
 
 def plot_spectro(
     df,
     y_true,
     y_pred,
     subject_name,
-    sfreq = 63,
+    sfreq=63,
 ):
     """Visualisation tool to display the prediction of LOC and ROC on a spectrogram"""
     nperseg = np.floor(1.5 * sfreq)
@@ -166,7 +169,7 @@ def plot_spectro(
 
     # Spectrogram
     Axspectrum, freqs, bins, im = ax.specgram(
-        df.iloc[:,2],
+        df.iloc[:, 2],
         Fs=sfreq,
         NFFT=int(nperseg),
         mode="psd",
@@ -180,6 +183,7 @@ def plot_spectro(
     [y_true, y_pred], 0, 30, "r", ":", linewidth=4, label="LOC & ROC prediction"
     )
     set_ax_setting(ax, df.index[0], df.index[-1] / sfreq, ylim=(0, 30))
+
 
 def make_confusion_matrix(
     y_test,
