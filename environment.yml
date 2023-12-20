@@ -212,7 +212,7 @@ dependencies:
       - fonttools==4.43.1
       - kiwisolver==1.4.5
       - matplotlib==3.8.1
-      - mne==1.2.1
+      - mne==1.6
       - pillow==10.1.0
       - pooch==1.8.0
       - pyparsing==3.1.1
