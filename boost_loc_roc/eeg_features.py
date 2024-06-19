@@ -76,8 +76,8 @@ def create_validation_set(dataset):
 
 
 def raw_segmentation(
-    raw: mne.io.Raw,  
-    epochs_duration: int, 
+    raw: mne.io.Raw,
+    epochs_duration: int,
     shift: int,
 ) -> mne.Epochs:
     """
@@ -149,7 +149,7 @@ def smooth_psd(
     """
     psd, freqs = mne.time_frequency.psd_array_welch(
         epochs.get_data(),
-        sfreq=63,
+        sfreq=epochs.info['sfreq'],
         fmin=0,
         fmax=30,
         n_fft=n_fft,
