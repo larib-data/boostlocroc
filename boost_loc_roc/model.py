@@ -6,8 +6,6 @@ import os.path as op
 from joblib import load
 import numpy as np
 
-import sys
-sys.path.append('C:/Users/Cartailler Jerome/Dropbox/Tungsten/boost-loc-roc/')
 
 def get_models(template, n_splits):
     """Choose the model."""

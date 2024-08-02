@@ -8,6 +8,7 @@ from boost_loc_roc.model import get_models, create_voting_ensemble_model
 from boost_loc_roc.eeg_features import smooth_probability, compute_input_sample
 from scipy.interpolate import interp1d
 
+
 def fun_LOC(x, t, y):
     """Minimization of the logistic regression."""
     return (1-x[2]) + x[2]*objective_LOC(t, x[0], x[1]) - y
@@ -78,10 +79,10 @@ def extract_loc_roc(
     option = define_option(subsampling, weighted, binary)
 
     cross_val_pathname = f"cross_val_weights_{seed}_{option}"
-    weights_dir = "boost_loc_roc/model_weights/"
-    models = get_models(weights_dir, cross_val_pathname, n_splits)
+    # weights_dir = "boost_loc_roc/model_weights/"
+    models = get_models(cross_val_pathname, n_splits)
 
-    voting_ensemble_model = create_voting_ensemble_model(models, weights_dir)
+    voting_ensemble_model = create_voting_ensemble_model(models)
     # print(voting_ensemble_model)
 
     epochs_duration = 30
