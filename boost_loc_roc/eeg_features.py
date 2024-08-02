@@ -30,7 +30,6 @@ from scipy.signal import savgol_filter
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 
-
 def create_validation_set(dataset):
     """
     Create validation set using the train_test_split function from sklearn.model_selection. 
