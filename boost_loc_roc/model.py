@@ -6,11 +6,15 @@ import os.path as op
 from joblib import load
 import numpy as np
 
+import sys
+sys.path.append('C:/Users/Cartailler Jerome/Dropbox/Tungsten/boost-loc-roc/')
 
-
-def get_models(weights_dir,template, n_splits):
+def get_models(template, n_splits):
     """Choose the model."""
-    models = [load(op.join(weights_dir, f"{template}{i}.pkl")) for i in range(n_splits)]
+    # Get the directory where the current script is located
+    script_dir = op.dirname(op.abspath(__file__))
+    # Define the relative path to the pkl file
+    models = [load(op.join(script_dir, 'model_weights', f"{template}{i}.pkl")) for i in range(n_splits)]
     return models
 
 
@@ -37,7 +41,7 @@ def create_model(
 
 
 def create_voting_ensemble_model(
-    clf_list, weights_dir, y_train = None, voting="soft", n_jobs=-1, verbose=True
+    clf_list, y_train = None, voting="soft", n_jobs=-1, verbose=True
 ):
     """Create a voting ensemble model."""
     voting_classifier = VotingClassifier(
@@ -53,14 +57,17 @@ def create_voting_ensemble_model(
 
     voting_classifier.estimators_ = clf_list
 
+    script_dir = op.dirname(op.abspath(__file__))
+    weight_dir = op.join(script_dir, 'model_weights', 'voting_classifier_weight.npy')
+    
     if y_train is not None : 
         voting_classifier.le_ = LabelEncoder().fit(y_train)
-        np.save(op.join(weights_dir, 'voting_classifier_weight.npy'), voting_classifier.le_.classes_)
+        np.save(weight_dir, voting_classifier.le_.classes_)
         voting_classifier.classes_ = voting_classifier.le_.classes_
 
     else : 
         voting_classifier.le_ = LabelEncoder()
-        voting_classifier.classes_ = np.load(op.join(weights_dir, 'voting_classifier_weight.npy'))
+        voting_classifier.classes_ = np.load(weight_dir)
         voting_classifier.le_.classes_ = voting_classifier.classes_
 
     return voting_classifier
