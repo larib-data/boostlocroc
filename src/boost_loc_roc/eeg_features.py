@@ -17,6 +17,7 @@ Functions
 
 
 """
+
 import random
 
 import matplotlib.pyplot as plt
@@ -30,9 +31,10 @@ from scipy.signal import savgol_filter
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 
+
 def create_validation_set(dataset):
     """
-    Create validation set using the train_test_split function from sklearn.model_selection. 
+    Create validation set using the train_test_split function from sklearn.model_selection.
     Statistical consistency is preserved by using stratification on labels.
 
     Parameters
@@ -115,7 +117,7 @@ def raw_segmentation(
         baseline=None,
         reject=None,
         preload=True,
-        flat={"eeg": 1e-7}, # remove epochs with signal amplitude between [-0.1;0.1] uV
+        flat={"eeg": 1e-7},  # remove epochs with signal amplitude between [-0.1;0.1] uV
         decim=1,
         verbose=False,
     )
@@ -123,10 +125,7 @@ def raw_segmentation(
 
 
 def smooth_psd(
-    epochs: mne.Epochs, 
-    n_fft: int, 
-    n_overlap: int, 
-    num_features:int
+    epochs: mne.Epochs, n_fft: int, n_overlap: int, num_features: int
 ) -> np.ndarray:
     """
     Compute the power spectral density (PSD) using Welch method for each epochs.
@@ -148,7 +147,7 @@ def smooth_psd(
     """
     psd, freqs = mne.time_frequency.psd_array_welch(
         epochs.get_data(),
-        sfreq=epochs.info['sfreq'],
+        sfreq=epochs.info["sfreq"],
         fmin=0,
         fmax=30,
         n_fft=n_fft,
@@ -202,12 +201,12 @@ def __tanh_soft(x, a, x0):
 
 
 def compute_input_sample(
-    raw: mne.io.Raw, 
-    epochs_duration: int, 
-    shift: int, 
+    raw: mne.io.Raw,
+    epochs_duration: int,
+    shift: int,
     n_fft: int,
     n_overlap: int,
-    num_features: int
+    num_features: int,
 ) -> pd.DataFrame:
     """
     Transform the raw signal into sequential psd.

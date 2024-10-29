@@ -1,4 +1,5 @@
 """Prediction tools for LOC and ROC."""
+
 from eeg_features import (
     smooth_probability,
     predict_gbc,
@@ -13,6 +14,7 @@ import pandas as pd
 import os.path as op
 from visualization import set_ax_setting, add_ax_vlines
 from scipy.optimize import least_squares
+
 
 def min_max_normalization(signal):
     """
@@ -34,6 +36,7 @@ def min_max_normalization(signal):
     signal = [(ele - min_signal) / diff_max_min_signal for ele in signal]
 
     return signal
+
 
 def least_square_pred(
     t,
@@ -93,9 +96,8 @@ def predict_probabilities(model, X, min_max_norm=False):
         X.drop("epochs", inplace=True, axis=1)
     if min_max_norm:
         probabilities = np.array(min_max_normalization(probabilities))
-        
-    return probabilities
 
+    return probabilities
 
 
 def predict_loc_roc(
@@ -104,7 +106,7 @@ def predict_loc_roc(
     y_true=(0, 0),
 ):
     """Prediction LOC and ROC."""
-    #probability = probability["probabilities"].to_numpy()
+    # probability = probability["probabilities"].to_numpy()
     L = len(probability)
     t = np.linspace(0, L * epochs_duration, L)
     min_dur_intervention = 0

@@ -1,4 +1,5 @@
 """Training module."""
+
 from sklearn.model_selection import StratifiedGroupKFold, cross_validate
 from joblib import dump
 import os.path as op
@@ -83,5 +84,3 @@ def train_and_save_cv(
     pickle_out.close()
 
     return cv_results, idx_train, idx_val
-
-

@@ -1,4 +1,5 @@
 """Create feature from PSD."""
+
 import os.path as op
 import pandas as pd
 from tqdm.auto import tqdm
@@ -77,7 +78,6 @@ def epochs_labels_dataset(dst_csv_file, binary=True):
         for subject_name, row in tqdm(
             loc_roc_labels.iterrows(), total=loc_roc_labels.shape[0]
         ):
-
             loc, roc = __loc_roc_from_subject_name(subject_name)
 
             _, epochs = __epochs_labels(subject_name, loc, roc)
@@ -89,7 +89,6 @@ def epochs_labels_dataset(dst_csv_file, binary=True):
         for subject_name, row in tqdm(
             loc_roc_labels.iterrows(), total=loc_roc_labels.shape[0]
         ):
-
             loc, roc = __loc_roc_from_subject_name(subject_name)
 
             _, epochs = __epochs_labels(subject_name, loc, roc)

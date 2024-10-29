@@ -1,4 +1,5 @@
 """Visualization module."""
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
@@ -145,9 +146,9 @@ def set_ax_setting(ax, min_x, max_x, ylim=(-30, 30), step=250, labelrotation=45)
 
 def plot_proba(proba_raw, proba_smooth, bedstay):
     fig, ax = plt.subplots()
-    ax.plot(proba_smooth, label='smooth probability')
-    ax.plot(proba_raw, label='voting ensemble model probabilities')
-    ax.legend(loc='center')
+    ax.plot(proba_smooth, label="smooth probability")
+    ax.plot(proba_raw, label="voting ensemble model probabilities")
+    ax.legend(loc="center")
     ax.set_title(
         f"Voting ensemble probabilities of Loc & ROC for the patient {bedstay}"
     )
@@ -180,7 +181,7 @@ def plot_spectro(
         f"EEG feature extraction : LOC and ROC\n\nSpectrogram of {subject_name}"
     )
     ax.vlines(
-    [y_true, y_pred], 0, 30, "r", ":", linewidth=4, label="LOC & ROC prediction"
+        [y_true, y_pred], 0, 30, "r", ":", linewidth=4, label="LOC & ROC prediction"
     )
     set_ax_setting(ax, df.index[0], df.index[-1] / sfreq, ylim=(0, 30))
 
@@ -358,15 +359,17 @@ def display_roc_proba(
         plt.plot(
             fpr["micro"],
             tpr["micro"],
-            label="micro-average ROC curve (area = {0:0.3f})"
-            "".format(roc_auc["micro"]),
+            label="micro-average ROC curve (area = {0:0.3f})" "".format(
+                roc_auc["micro"]
+            ),
         )
         for i in range(n_classes):
             plt.plot(
                 fpr[i],
                 tpr[i],
-                label="ROC curve of class {0} (area = {1:0.3f})"
-                "".format(i, roc_auc[i]),
+                label="ROC curve of class {0} (area = {1:0.3f})" "".format(
+                    i, roc_auc[i]
+                ),
             )
 
         plt.plot([0, 1], [0, 1], "k--")
@@ -389,7 +392,6 @@ def display_precision_recall_curve(
     from itertools import cycle
     from sklearn.metrics import PrecisionRecallDisplay
 
-
     y_proba = model.predict_proba(X_test)
     y_test = label_binarize(y_test, classes=[0, 1, 2])
     n_classes = y_test.shape[1]
@@ -404,8 +406,12 @@ def display_precision_recall_curve(
         average_precision[i] = average_precision_score(y_test[:, i], y_proba[:, i])
 
     # A "micro-average": quantifying score on all classes jointly
-    precision["micro"], recall["micro"], _ = precision_recall_curve( y_test.ravel(), y_proba.ravel())
-    average_precision["micro"] = average_precision_score(y_test, y_proba, average="micro")
+    precision["micro"], recall["micro"], _ = precision_recall_curve(
+        y_test.ravel(), y_proba.ravel()
+    )
+    average_precision["micro"] = average_precision_score(
+        y_test, y_proba, average="micro"
+    )
 
     # Display
     colors = cycle(["navy", "turquoise", "darkorange", "cornflowerblue", "teal"])

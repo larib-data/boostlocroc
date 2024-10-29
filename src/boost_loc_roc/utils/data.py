@@ -1,4 +1,5 @@
 """Data processing."""
+
 import pandas as pd
 import numpy as np
 import os.path as op
@@ -123,7 +124,12 @@ def weighted_dataset(X, Y, batching_size_factor=2, random_state=42, binary=True)
 
     epochs_loc = train_1.groupby("ID").head(6)
     epochs_roc = train_1.groupby("ID").tail(12)
-    epochs = train_1.groupby("ID", as_index=False).apply(lambda group: group.iloc[6:-12]).reset_index(level="ID").set_index("ID")
+    epochs = (
+        train_1.groupby("ID", as_index=False)
+        .apply(lambda group: group.iloc[6:-12])
+        .reset_index(level="ID")
+        .set_index("ID")
+    )
     sample_size = int(
         batching_size_factor * len(train_0) / len(train_set.index.unique())
     )

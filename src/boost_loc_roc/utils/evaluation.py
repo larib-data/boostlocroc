@@ -1,6 +1,8 @@
 """Evaluation of the model."""
+
 from eeg_features import compute_accuracy
-#from .visualization import plot_pred, plot_zoom => TODO : supprimer
+
+# from .visualization import plot_pred, plot_zoom => TODO : supprimer
 from tqdm.auto import tqdm
 from matplotlib import pyplot as plt
 import numpy as np
@@ -9,7 +11,7 @@ import os.path as op
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from scipy.stats import t
 from matplotlib.pylab import rcParams
-#import shap
+# import shap
 
 from data import get_subject
 from prediction import predict_probabilities, predict_loc_roc
@@ -526,8 +528,7 @@ def new_evaluate_model(
     y_pred_list = []
 
     for idx in tqdm(X.index.unique()):
-        X_subject_name, Y_subject, y_true = get_subject(
-            X, Y, idx, loc_roc_labels)
+        X_subject_name, Y_subject, y_true = get_subject(X, Y, idx, loc_roc_labels)
         probability = predict_probabilities(
             model, X_subject_name, min_max_norm=min_max_norm
         )

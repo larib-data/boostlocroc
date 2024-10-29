@@ -2,6 +2,7 @@
 
 sfreq = 63
 
+
 def filter_operation(df, raw, y_true):
     """Filter the EEG."""
     parquet, (first, last) = __filter_df_between(df)
