@@ -6,13 +6,23 @@ def check_and_rescale_units(filename, threshold=5, new_filename=None):
     """
     Check the units of the EEG signal and rescale if necessary.
 
-    Parameters:
-    filename (str): Path to the input .fif file.
-    threshold (float): The threshold to determine if the units are in microvolts (a bit arbitrary, but distinguishing between uV and V should be enough).
-    new_filename (str): Path to save the rescaled .fif file. If None, a default name is used.
+    Parameters
+    ----------
+    filename: str
+        Path to the input .fif file.
+    threshold: float, default=5
+        The threshold to determine if the units are in microvolts.
+        If the median of the absolute values of the signal exceeds this
+        threshold, the units are likely in microvolts and the signal is
+        rescaled to volts.
+    new_filename: str, default=None
+        Path to save the rescaled .fif file. If None, a default name is used.
 
-    Returns:
-    str: Path to the rescaled .fif file, if rescaling was performed.
+    Returns
+    -------
+    res: str or None.
+        Path to the rescaled .fif file, if rescaling was performed.
+        None, if no rescaling was performed.
     """
     # Read the raw data
     raw = mne.io.read_raw_fif(filename, preload=True)
@@ -43,11 +53,34 @@ def check_and_rescale_units(filename, threshold=5, new_filename=None):
 
 
 def detrend_and_reset_time(df, var="BIS/EEG1_WAV", new_name="EEG", trend_wind=300):
-    # time reset
+    """
+    Detrends channel `var` of `df` DataFrame and and resets its time so it
+    starts at 0 seconds.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        The DataFrame containing the data. df is modified *in place*.
+        Must contain channels "Time" and `var`.
+    var: str
+        The name of the channel to detrend. Default is "BIS/EEG1_WAV".
+    new_name: str
+        The new name for the detrended channel. Default is "EEG".
+    trend_wind: int
+        The window size for the soft detrending. Default is 300.
+
+    Returns
+    -------
+    df: pandas.DataFrame
+        The modified DataFrame where time is reset,
+        channel `var` is replaced with its interpolation, and
+        the detrended channel is added with name `new_name`.
+    """
+    # Time reset
     start = df["Time"].iloc[0]
     df["Time"] = df["Time"] - start
 
-    # soft detrend
+    # Soft detrend
     dt = np.nanmedian(np.diff(df["Time"]))
     df[var] = df[var].interpolate(method="linear")
     trend = (
