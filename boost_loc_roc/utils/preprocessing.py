@@ -33,7 +33,7 @@ def truncate_fif(raw, electrode=1):
 
     return mne.io.RawArray(data, info)
 
-
+ 
 def filter_operation(df, raw, y_true):
     """Filter the EEG."""
     parquet, (first, last) = __filter_df_between(df)
