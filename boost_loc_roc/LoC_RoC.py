@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import mne
 from scipy.optimize import least_squares
-from boost_loc_roc.model import get_models, create_voting_ensemble_model
+from boost_loc_roc.model import load_voting_skmodel
 from boost_loc_roc.eeg_features import smooth_probability, compute_input_sample
+from boost_loc_roc.utils.onnx import onx_make_session, onx_predict_proba
 
 
 def fun_LOC(x, t, y):
@@ -31,64 +32,22 @@ def objective_ROC(x, a, x0):
     return 1 - (1 + np.exp(b)) ** (-1)
 
 
-def define_option(subsampling, weighted, binary):
-    res = "--"
-    if subsampling:
-        res += "s"
-    if weighted:
-        res += "w"
-    if binary:
-        res += "b"
-    res += "--"
-    return res
+def proba_to_tloc_troc(probability, epochs_duration):
+    """Convert probability to time of LoC and RoC.
 
-
-def extract_loc_roc(
-    raw: mne.io.Raw
-) -> tuple[np.float64, np.float64, np.ndarray, np.ndarray]:
-    """
-    Extract the LOC and ROC from raw EEG data. (MAIN FUNCTION)
-
-    Return LoC and RoC times in second (from the beginning of the operation)
-    """
-    n_splits = 3
-    subsampling = False  # subsampling option
-    weighted = True  # Weighted option
-    binary = False  # True = 2 labels / False = 3 labels
-    seed = 42
-
-    option = define_option(subsampling, weighted, binary)
-
-    cross_val_pathname = f"cross_val_weights_{seed}_{option}"
-    weights_dir = "boost_loc_roc/model_weights/"
-    models = get_models(weights_dir, cross_val_pathname, n_splits)
-
-    voting_ensemble_model = create_voting_ensemble_model(models, weights_dir)
-    # print(voting_ensemble_model)
-
-    epochs_duration = 30
-    shift = 30
-    n_fft = 512
-    n_overlap = 128
-    num_features = 50
-
-    input_samples = compute_input_sample(
-        raw,
-        epochs_duration,
-        shift,
-        n_fft,
-        n_overlap,
-        num_features
-    )
-
-    probability = voting_ensemble_model.predict_proba(input_samples)
-    probability = smooth_probability(probability)
-
+    Parameters
+    ----------
+    probability : np.ndarray, shape (n_epochs,)
+        Probability of each epoch.
+    epochs_duration : float
+        Duration of each epoch in seconds."""
     # Time
     L = len(probability)
     t = np.linspace(0, L * epochs_duration, L)
 
+    # Estimate time of LoC
     # Least-squares : reduce the influence of outliers
+    # t < 110 * 60 prevents divergence, LoC is assumed to occur before 2 hours
     res_robust_LOC = least_squares(
         fun_LOC,
         np.array([0.2, 15 * 60]),
@@ -101,12 +60,10 @@ def extract_loc_roc(
     )
     time_loc = res_robust_LOC.x[1]
 
-    # Time
-    L = len(probability)
-    t = np.linspace(0, L * epochs_duration, L)
-    min_dur_intervention = 30
-
-    # Least-sqaures : reduce the influence of outliers
+    # Estimate time of RoC
+    # Least-squares : reduce the influence of outliers
+    # t > time_loc + min_dur_intervention * 60 prevents divergence
+    min_dur_intervention = 30  # minutes
     res_robust_ROC = least_squares(
         fun_ROC,
         np.array([0.2, t[int(len(t) * 0.95)]]),
@@ -124,10 +81,80 @@ def extract_loc_roc(
 
     time_roc = res_robust_ROC.x[1]
 
+    return time_loc, time_roc, t
+
+
+def extract_loc_roc(raw):
+    """Extract the LOC and ROC times from raw EEG data,
+    using ONNX voting ensemble model.
+
+    Parameters
+    ----------
+    raw : mne.io.Raw
+        Raw EEG data.
+
+    Returns
+    -------
+    time_loc : np.float
+        Time of LoC in seconds.
+    time_roc : np.float
+        Time of RoC in seconds.
+    t_proba : np.ndarray
+        Time of each epoch in seconds.
+    proba : np.ndarray
+        Probability of each epoch.
+    """
+    # Pre-process data
+    input_sample = compute_input_sample(raw).to_numpy()
+    # Load onnx model
+    session = onx_make_session('boost_loc_roc/model_weights/voting_model.onnx')
+    # Predict probabilities
+    proba = onx_predict_proba(session, input_sample)
+    proba = smooth_probability(proba)
+    # Infer times of LoC and RoC
+    time_loc, time_roc, t_proba = proba_to_tloc_troc(proba, epochs_duration=30)
+    return time_loc, time_roc, t_proba, proba
+
+
+def extract_loc_roc_sklearn(
+    raw: mne.io.Raw,
+) -> tuple[np.float64, np.float64, np.ndarray, np.ndarray]:
+    """
+    Extract the LOC and ROC from raw EEG data,
+    using sklearn pretrained model.
+
+    To load the pretrained sklearn model,
+    you need to have the same sklearn version as the one used to train the
+    model, i.e 1.0.2. To avoid this constraint, use `extract_loc_roc` instead.
+
+    Parameters
+    ----------
+    raw : mne.io.Raw
+        Raw EEG data.
+
+    Returns
+    -------
+    time_loc : np.float64
+        Time of LoC in seconds.
+    time_roc : np.float64
+        Time of RoC in seconds.
+    t : np.ndarray
+        Time of each epoch in seconds.
+    probability : np.ndarray
+        Probability of each epoch.
+    """
+    voting_ensemble_model = load_voting_skmodel()
+
+    input_samples = compute_input_sample(raw).to_numpy()
+
+    probability = voting_ensemble_model.predict_proba(input_samples)
+    probability = smooth_probability(probability)
+    time_loc, time_roc, t = proba_to_tloc_troc(probability, epochs_duration=30)
+
     return time_loc, time_roc, t, probability
 
 
-def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba): 
+def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba):
     """Plot the spectrogram and probability as subplots."""
     fig = plt.figure(figsize=(15, 9))
     gs = gridspec.GridSpec(3, 1, height_ratios=[3, 3, 1])
@@ -163,29 +190,3 @@ def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba):
     ax[2].set_xlabel('Time')
     ax[2].set_ylabel('Proba')
     plt.show()
-
-
-def Truncate_fif(raw, electrode=1):
-    """Remove data from a Raw object where the signal is between -0.1 and 0.1 uV."""
-
-    data, times = raw[:]
-    electrode = data[electrode, :]*10**6
-
-    mask1 = (electrode > -1) & (electrode < 1)
-    mask1 = 1-mask1
-    mask2 = np.ones_like(mask1)
-    first_one = np.argmax(mask1)
-    last_one = len(mask1) - 1 - np.argmax(mask1[::-1])
-
-    mask2[:first_one] = 0
-    mask2[last_one + 1:] = 0
-    mask2 = mask2.astype(bool)
-
-    # data[:, ~mask2] = 0
-    data = data[:, mask2]
-    ch_types = [mne.io.pick.channel_type(raw.info, idx) for idx in range(raw.info['nchan'])]
-
-    info = mne.create_info(ch_names=raw.info['ch_names'],
-                           sfreq=raw.info['sfreq'], ch_types=ch_types)
-
-    return mne.io.RawArray(data, info)
