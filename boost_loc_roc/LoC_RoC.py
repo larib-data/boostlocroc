@@ -32,40 +32,6 @@ def objective_ROC(x, a, x0):
     return 1 - (1 + np.exp(b)) ** (-1)
 
 
-def extract_loc_roc_sklearn(
-    raw: mne.io.Raw,
-) -> tuple[np.float64, np.float64, np.ndarray, np.ndarray]:
-    """
-    Extract the LOC and ROC from raw EEG data,
-    using sklearn pretrained model.
-
-    Parameters
-    ----------
-    raw : mne.io.Raw
-        Raw EEG data.
-
-    Returns
-    -------
-    time_loc : np.float64
-        Time of LoC in seconds.
-    time_roc : np.float64
-        Time of RoC in seconds.
-    t : np.ndarray
-        Time of each epoch in seconds.
-    probability : np.ndarray
-        Probability of each epoch.
-    """
-    voting_ensemble_model = load_voting_skmodel()
-
-    input_samples = compute_input_sample(raw).to_numpy()
-
-    probability = voting_ensemble_model.predict_proba(input_samples)
-    probability = smooth_probability(probability)
-    time_loc, time_roc, t = proba_to_tloc_troc(probability, epochs_duration=30)
-
-    return time_loc, time_roc, t, probability
-
-
 def proba_to_tloc_troc(probability, epochs_duration):
     """Convert probability to time of LoC and RoC.
 
@@ -118,7 +84,7 @@ def proba_to_tloc_troc(probability, epochs_duration):
     return time_loc, time_roc, t
 
 
-def extract_loc_roc_onnx(raw):
+def extract_loc_roc(raw):
     """Extract the LOC and ROC times from raw EEG data,
     using ONNX voting ensemble model.
 
@@ -148,6 +114,44 @@ def extract_loc_roc_onnx(raw):
     # Infer times of LoC and RoC
     time_loc, time_roc, t_proba = proba_to_tloc_troc(proba, epochs_duration=30)
     return time_loc, time_roc, t_proba, proba
+
+
+def extract_loc_roc_sklearn(
+    raw: mne.io.Raw,
+) -> tuple[np.float64, np.float64, np.ndarray, np.ndarray]:
+    """
+    Extract the LOC and ROC from raw EEG data,
+    using sklearn pretrained model.
+
+    To load the pretrained sklearn model,
+    you need to have the same sklearn version as the one used to train the
+    model, i.e 1.0.2. To avoid this constraint, use `extract_loc_roc` instead.
+
+    Parameters
+    ----------
+    raw : mne.io.Raw
+        Raw EEG data.
+
+    Returns
+    -------
+    time_loc : np.float64
+        Time of LoC in seconds.
+    time_roc : np.float64
+        Time of RoC in seconds.
+    t : np.ndarray
+        Time of each epoch in seconds.
+    probability : np.ndarray
+        Probability of each epoch.
+    """
+    voting_ensemble_model = load_voting_skmodel()
+
+    input_samples = compute_input_sample(raw).to_numpy()
+
+    probability = voting_ensemble_model.predict_proba(input_samples)
+    probability = smooth_probability(probability)
+    time_loc, time_roc, t = proba_to_tloc_troc(probability, epochs_duration=30)
+
+    return time_loc, time_roc, t, probability
 
 
 def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba):
