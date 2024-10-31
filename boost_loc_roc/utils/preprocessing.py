@@ -1,8 +1,9 @@
-"""TODO : add description."""
+"""Preprocess EEG data."""
 import numpy as np
 import mne
 
 sfreq = 63
+
 
 def truncate_fif(raw, electrode=1):
     """Remove data from a Raw object where the signal is between
