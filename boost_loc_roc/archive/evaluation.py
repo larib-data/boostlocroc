@@ -1,6 +1,5 @@
 """Evaluation of the model."""
-from eeg_features import compute_accuracy
-#from .visualization import plot_pred, plot_zoom => TODO : supprimer
+from .visualization import plot_pred, plot_zoom
 from tqdm.auto import tqdm
 from matplotlib import pyplot as plt
 import numpy as np
@@ -9,9 +8,10 @@ import os.path as op
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from scipy.stats import t
 from matplotlib.pylab import rcParams
-#import shap
+import shap
+from scipy.interpolate import interp1d
 
-from data import get_subject
+from .data import get_subject
 from prediction import predict_probabilities, predict_loc_roc
 
 
@@ -30,6 +30,25 @@ params = {
 }
 
 rcParams.update(params)
+
+
+def compute_accuracy(y_true, y_pred, precision):
+    """Precision in seconds."""
+    if y_pred < y_true - precision * 2 or y_pred > y_true + precision * 2:
+        return 0.0
+
+    x = [
+        y_true - precision * 2,
+        y_true - precision,
+        y_true - precision / 2,
+        y_true,
+        y_true + precision,
+        y_true + precision / 2,
+        y_true + precision * 2,
+    ]
+    y = [0, 0.5, 0.9, 1, 0.9, 0.5, 0]
+
+    return interp1d(x, y)(y_pred)
 
 
 def evaluate(

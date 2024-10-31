@@ -1,6 +1,8 @@
-"""Module to define the GB and voting ensemble model."""
+"""Functions used to define the GB and voting ensemble scikit-learn models.
+Archival: functions in this module are not used in the package. They are kept
+for reference purposes."""
 
-from sklearn.ensemble import VotingClassifier, GradientBoostingClassifier
+from sklearn.ensemble import VotingClassifier
 from sklearn.preprocessing import LabelEncoder
 
 import os.path as op
@@ -9,37 +11,50 @@ import numpy as np
 
 
 def get_models(weights_dir, template, n_splits):
-    """Choose the model."""
-    models = [load(op.join(weights_dir, f"{template}{i}.pkl")) for i in range(n_splits)]
+    """Load scikit-learn models from disk.
+
+    Should only be used if you want to train your own model.
+    Only works with scikit-learn version 1.0.2.
+
+    Parameters
+    ----------
+    weights_dir: str
+        Path to the directory containing the models.
+    template: str
+        Template of the model names.
+    n_splits: int
+        Number of splits, also the number of models to load.
+
+    Returns
+    -------
+    models: list
+        List of loaded models.
+    """
+    models = [load(op.join(weights_dir, f"{template}{i}.pkl"))
+              for i in range(n_splits)]
     return models
 
 
-def create_model(
-    n_estimators=138,
-    learning_rate=0.24210526315789474,
-    min_samples_leaf=6,
-    max_depth=2,
-    min_samples_split=2,
-    random_state=42,
-    max_features=None,
-):
-    """Create a GB model."""
-    model = GradientBoostingClassifier(
-        n_estimators=n_estimators,
-        learning_rate=learning_rate,
-        min_samples_leaf=min_samples_leaf,
-        max_depth=max_depth,
-        min_samples_split=min_samples_split,
-        random_state=random_state,
-        max_features=max_features,
-    )
-    return model
-
-
 def create_voting_ensemble_model(
-    clf_list, weights_dir, y_train=None, voting="soft", n_jobs=-1, verbose=True
+    clf_list, weights_dir, voting="soft", n_jobs=-1, verbose=True
 ):
-    """Create a voting ensemble model."""
+    """Create a voting ensemble model from loaded sklearn models.
+
+    Should only be used if you want to train your own model. Loaded
+    models were GradientBoostingClassifier models.
+
+    Parameters
+    ----------
+    clf_list: list
+        List of loaded models.
+    weights_dir: str
+        Path to the directory containing the models.
+
+    Returns
+    -------
+    voting_classifier: VotingClassifier
+        Voting ensemble model.
+    """
     voting_classifier = VotingClassifier(
         estimators=[
             ("gbc1", clf_list[0]),
@@ -52,21 +67,11 @@ def create_voting_ensemble_model(
     )
 
     voting_classifier.estimators_ = clf_list
-
-    if y_train is not None:
-        voting_classifier.le_ = LabelEncoder().fit(y_train)
-        np.save(
-            op.join(weights_dir, "voting_classifier_weight.npy"),
-            voting_classifier.le_.classes_,
-        )
-        voting_classifier.classes_ = voting_classifier.le_.classes_
-
-    else:
-        voting_classifier.le_ = LabelEncoder()
-        voting_classifier.classes_ = np.load(
-            op.join(weights_dir, "voting_classifier_weight.npy")
-        )
-        voting_classifier.le_.classes_ = voting_classifier.classes_
+    voting_classifier.le_ = LabelEncoder()
+    voting_classifier.classes_ = np.load(
+        op.join(weights_dir, "voting_classifier_weight.npy")
+    )
+    voting_classifier.le_.classes_ = voting_classifier.classes_
 
     return voting_classifier
 
@@ -92,6 +97,8 @@ def load_voting_skmodel(
 ):
     """ Loads pre-trained voting model from disk and returns it.
 
+    Should only be used if you want to train your own model.
+
     Parameters
     ----------
     Options used for the model training.
@@ -113,5 +120,3 @@ def load_voting_skmodel(
 
     voting_ensemble_model = create_voting_ensemble_model(models, weights_dir)
     return voting_ensemble_model
-
-

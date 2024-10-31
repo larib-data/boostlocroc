@@ -1,5 +1,5 @@
 """Script to load a pre-trained sklearn model, convert it to ONNX format and
-save it.
+save it. Archive.
 
 This script was used to convert the voting model used in the LoC-RoC project
 to ONNX format. It should be run with the same environment as the one used to
@@ -12,7 +12,7 @@ import mne
 from onnxruntime import InferenceSession
 import numpy as np
 import pandas as pd
-from model import load_voting_skmodel
+from boost_loc_roc.archive.model import load_voting_skmodel
 from eeg_features import compute_input_sample
 from utils.preprocessing import truncate_fif
 from skl2onnx import to_onnx

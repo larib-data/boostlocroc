@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import mne
 from scipy.optimize import least_squares
-from boost_loc_roc.model import load_voting_skmodel
+from boost_loc_roc.archive.model import load_voting_skmodel
 from boost_loc_roc.eeg_features import smooth_probability, compute_input_sample
 from boost_loc_roc.utils.onnx import onx_make_session, onx_predict_proba
 
@@ -154,8 +154,31 @@ def extract_loc_roc_sklearn(
     return time_loc, time_roc, t, probability
 
 
-def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba):
-    """Plot the spectrogram and probability as subplots."""
+def plot_spectrogram(time_loc, time_roc, signal, sfreq, time, t_proba, proba):
+    """Plots the spectrogram , estimated LoC/RoC times and per epoch LoC/RoC
+    probability.
+
+    Parameters
+    ----------
+    time_loc : float
+        Time of LoC in seconds.
+    time_roc : float
+        Time of RoC in seconds.
+    signal : np.ndarray
+        EEG signal to plot.
+    sfreq: float
+        Sampling frequency of the EEG signal.
+    time : np.ndarray
+        Time of each EEG sample in seconds.
+    t_proba: np.ndarray
+        Time of each epoch in seconds.
+    proba: np.ndarray
+        Probability of each epoch.
+
+    Returns
+    -------
+    None
+    """
     fig = plt.figure(figsize=(15, 9))
     gs = gridspec.GridSpec(3, 1, height_ratios=[3, 3, 1])
 
@@ -168,12 +191,12 @@ def plot_spectrogram(time_loc, time_roc, signal, Fs, time, t_proba, proba):
     ax[0].axvline(x=time_loc, color='r', linestyle='--', linewidth=3)
     ax[0].axvline(x=time_roc, color='r', linestyle='--', linewidth=3)
 
-    nperseg = np.floor(1.5*Fs).squeeze()
+    nperseg = np.floor(1.5*sfreq).squeeze()
     noverlap = np.floor(nperseg/3).squeeze()
 
     pxx, freqs, bins, im = ax[0].specgram(
         signal,
-        Fs=Fs,
+        Fs=sfreq,
         NFFT=int(nperseg),
         # window= np.hamming,
         mode='psd',
