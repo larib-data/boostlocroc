@@ -124,9 +124,9 @@ def raw_segmentation(
 
 
 def smooth_psd(
-    epochs: mne.Epochs, 
-    n_fft: int, 
-    n_overlap: int, 
+    epochs: mne.Epochs,
+    n_fft: int,
+    n_overlap: int,
     num_features:int
 ) -> np.ndarray:
     """
@@ -148,7 +148,7 @@ def smooth_psd(
      Smooth_psd : ndarray, shape(n_epochs, smooth_psd)
     """
     psd, freqs = mne.time_frequency.psd_array_welch(
-        epochs.get_data(),
+        epochs.get_data(copy=False),
         sfreq=epochs.info['sfreq'],
         fmin=0,
         fmax=30,
@@ -203,12 +203,12 @@ def __tanh_soft(x, a, x0):
 
 
 def compute_input_sample(
-    raw: mne.io.Raw, 
-    epochs_duration: int, 
-    shift: int, 
-    n_fft: int,
-    n_overlap: int,
-    num_features: int
+    raw: mne.io.Raw ,
+    epochs_duration: int = 30,
+    shift: int = 30,
+    n_fft: int = 512,
+    n_overlap: int = 128,
+    num_features: int = 50
 ) -> pd.DataFrame:
     """
     Transform the raw signal into sequential psd.
