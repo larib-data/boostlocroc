@@ -55,7 +55,7 @@ def raw_segmentation(
         baseline=None,
         reject=None,
         preload=True,
-        flat={"eeg": 1e-7}, # remove epochs with signal amplitude between [-0.1;0.1] uV
+        flat={"eeg": 1e-7},  # remove epochs with signal between [-0.1;0.1] uV
         decim=1,
         verbose=False,
     )

@@ -1,3 +1,12 @@
+""" Functions to handle ONNX models.
+
+- onx_make_session: Make an onnx session from a model path to run it.
+- onx_make_prediction: Make a prediction from an onnx session and an input
+sample.
+- onx_predict_class: Assigns a class to an input sample using an onnx session.
+- onx_predict_proba: Predict probabilities using an onnx session.
+"""
+
 import pandas as pd
 import numpy as np
 from onnxruntime import InferenceSession

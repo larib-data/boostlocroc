@@ -1,4 +1,6 @@
-"""Preprocess EEG data."""
+"""Preprocess EEG data.
+
+- truncate_fif: Remove artefacted data from a mne.Raw object."""
 import numpy as np
 import mne
 
