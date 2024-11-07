@@ -1,4 +1,4 @@
-""" Functions to handle ONNX models.
+"""Functions to handle ONNX models.
 
 - onx_make_session: Make an onnx session from a model path to run it.
 - onx_make_prediction: Make a prediction from an onnx session and an input
@@ -7,8 +7,8 @@ sample.
 - onx_predict_proba: Predict probabilities using an onnx session.
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from onnxruntime import InferenceSession
 
 
@@ -25,10 +25,7 @@ def onx_make_session(path):
     session: onnxruntime.InferenceSession
         Session to run the model.
     """
-    return InferenceSession(
-        path,
-        providers=["CPUExecutionProvider"]
-    )
+    return InferenceSession(path, providers=["CPUExecutionProvider"])
 
 
 def onx_make_prediction(session, input_sample):

@@ -2,12 +2,12 @@
 Archival: functions in this module are not used in the package. They are kept
 for reference purposes."""
 
+import os.path as op
+
+import numpy as np
+from joblib import load
 from sklearn.ensemble import VotingClassifier
 from sklearn.preprocessing import LabelEncoder
-
-import os.path as op
-from joblib import load
-import numpy as np
 
 
 def get_models(weights_dir, template, n_splits):

@@ -1,12 +1,12 @@
 """Data processing."""
-import pandas as pd
-import numpy as np
-import os.path as op
+
 import glob
+import os.path as op
 import pickle
-from mne.io import read_raw
+
+import numpy as np
+import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit
-from preprocessing import filter_operation
 
 
 def get_input_target(data):
@@ -59,7 +59,7 @@ def get_lists_of_raw_files():
 # Dataset builder
 def split_dataset(X, Y, test_size=0.2, random_state=42):
     """Split the dataset."""
-    # Split data in test/train subgroups according to a third-party provided group
+    # Split data in test/train subgroups according to a provided group
     groups = X.index
 
     train_inds, test_inds = next(
@@ -80,8 +80,10 @@ def split_dataset(X, Y, test_size=0.2, random_state=42):
     return train, test
 
 
-def subsample_dataset(X, Y, batching_size_factor=2, random_state=42, binary=True):
-    """Get input and target from the psd's labels csv with batching a priori."""
+def subsample_dataset(X, Y, batching_size_factor=2, random_state=42,
+                      binary=True):
+    """Get input and target from the psd's labels csv with batching a priori.
+    """
 
     train_set = pd.concat([X, Y], axis=1)
     train_1 = train_set[train_set.labels == 1]
@@ -110,8 +112,10 @@ def subsample_dataset(X, Y, batching_size_factor=2, random_state=42, binary=True
     return X, Y
 
 
-def weighted_dataset(X, Y, batching_size_factor=2, random_state=42, binary=True):
-    """Get input and target from the psd's labels csv with batching a priori."""
+def weighted_dataset(X, Y, batching_size_factor=2, random_state=42,
+                     binary=True):
+    """Get input and target from the psd's labels csv with batching a priori.
+    """
 
     train_set = pd.concat([X, Y], axis=1)
     train_1 = train_set[train_set.labels == 1]
@@ -123,7 +127,12 @@ def weighted_dataset(X, Y, batching_size_factor=2, random_state=42, binary=True)
 
     epochs_loc = train_1.groupby("ID").head(6)
     epochs_roc = train_1.groupby("ID").tail(12)
-    epochs = train_1.groupby("ID", as_index=False).apply(lambda group: group.iloc[6:-12]).reset_index(level="ID").set_index("ID")
+    epochs = (
+        train_1.groupby("ID", as_index=False)
+        .apply(lambda group: group.iloc[6:-12])
+        .reset_index(level="ID")
+        .set_index("ID")
+    )
     sample_size = int(
         batching_size_factor * len(train_0) / len(train_set.index.unique())
     )
@@ -143,7 +152,8 @@ def weighted_dataset(X, Y, batching_size_factor=2, random_state=42, binary=True)
     return X, Y
 
 
-def load_idx_train_test(template_name="cross_val_"):
+def load_idx_train_test(template_name="cross_val_",
+                        weights_dir="model_weights"):
     """Load index."""
     pickle_in = open(op.join(weights_dir, f"{template_name}_idx_spliting.pickle"), "rb")
     (idx_train, idx_test) = pickle.load(pickle_in)

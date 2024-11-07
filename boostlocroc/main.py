@@ -1,4 +1,4 @@
-"""Core functions of boost-loc-roc
+"""Core functions of boostlocroc
 
 Functions
 ---------
@@ -11,12 +11,13 @@ Functions
     extract_loc_roc_sklearn: Extract the LOC and ROC from raw EEG data, using
     the original sklearn model.
 """
-import numpy as np
 import mne
+import numpy as np
 from scipy.optimize import least_squares
-from boost_loc_roc.archive.model import load_voting_skmodel
-from boost_loc_roc.eeg_features import smooth_probability, compute_input_sample
-from boost_loc_roc.utils.onnx import onx_make_session, onx_predict_proba
+
+from boostlocroc.archive.model import load_voting_skmodel
+from boostlocroc.eeg_features import compute_input_sample, smooth_probability
+from boostlocroc.utils.onnx import onx_make_session, onx_predict_proba
 
 
 def fun_LOC(x, t, y):
@@ -118,7 +119,7 @@ def extract_loc_roc(raw):
     # Pre-process data
     input_sample = compute_input_sample(raw).to_numpy()
     # Load onnx model
-    session = onx_make_session('boost_loc_roc/model_weights/voting_model.onnx')
+    session = onx_make_session('boostlocroc/model_weights/voting_model.onnx')
     # Predict probabilities
     proba = onx_predict_proba(session, input_sample)
     proba = smooth_probability(proba)

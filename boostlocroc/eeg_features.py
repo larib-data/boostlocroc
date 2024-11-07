@@ -1,5 +1,4 @@
-"""
-Functions for computing EEG features.
+"""Functions for computing EEG features.
 
 Functions
 ---------
@@ -19,8 +18,7 @@ def raw_segmentation(
     epochs_duration: int,
     shift: int,
 ) -> mne.Epochs:
-    """
-    Create epochs in order to segment the raw signal.
+    """Create epochs in order to segment the raw signal.
 
     Parameters
     ----------
@@ -34,9 +32,8 @@ def raw_segmentation(
     Return
     ------
      Epochs : mne object
-    """
-    # raw = raw.np.copy()
 
+    """
     # Creating Epochs/events
     events = mne.make_fixed_length_events(
         raw,
@@ -66,10 +63,10 @@ def smooth_psd(
     epochs: mne.Epochs,
     n_fft: int,
     n_overlap: int,
-    num_features: int
+    num_features: int,
 ) -> np.ndarray:
-    """
-    Compute the power spectral density (PSD) using Welch method for each epoch.
+    """Compute the smooth PSD using Welch method for each epoch.
+
     Apply a Savitzky-Golay filter to the PSD computed for each epochs.
 
     Parameters
@@ -85,10 +82,11 @@ def smooth_psd(
     Return
     ------
      Smooth_psd : ndarray, shape(n_epochs, smooth_psd)
+
     """
     psd, freqs = mne.time_frequency.psd_array_welch(
         epochs.get_data(copy=False),
-        sfreq=epochs.info['sfreq'],
+        sfreq=epochs.info["sfreq"],
         fmin=0,
         fmax=30,
         n_fft=n_fft,
@@ -101,7 +99,7 @@ def smooth_psd(
 
     smooth_psd = np.zeros((num_features, n))
 
-    for i in range(0, n):
+    for i in range(n):
         from numpy import ma
 
         psds = savgol_filter(10 * ma.log10(psd[i, 1, :]).filled(0) + 120, 5, 0)
@@ -123,10 +121,9 @@ def compute_input_sample(
     shift: int = 30,
     n_fft: int = 512,
     n_overlap: int = 128,
-    num_features: int = 50
+    num_features: int = 50,
 ) -> pd.DataFrame:
-    """
-    Transform the raw signal into sequential psd.
+    """Transform the raw signal into sequential psd.
 
     Parameters
     ----------
@@ -146,6 +143,7 @@ def compute_input_sample(
     Return
     ------
      smooth_psd : ndarray, shape(n_epochs, smooth_psd)
+
     """
     epochs = raw_segmentation(raw, epochs_duration, shift)
     input_samples = smooth_psd(epochs, n_fft, n_overlap, num_features)
@@ -156,8 +154,7 @@ def compute_input_sample(
 
 
 def smooth_probability(probability):
-    """
-    Apply a Savitzky-Golay filter to the predict class probabilities compute
+    """Apply a Savitzky-Golay filter to the predict class probabilities compute
     for each epochs.
 
     Parameters
@@ -167,6 +164,7 @@ def smooth_probability(probability):
     Return
     ------
      smooth_probability : ndarray, shape(n_epochs, smooth_probability)
+
     """
     smooth_probability = savgol_filter(probability[:, 1], 3, 1)
     smooth_probability = __tanh_soft(smooth_probability, 2, 0.5)

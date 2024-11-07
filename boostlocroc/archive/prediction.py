@@ -1,18 +1,13 @@
 """Prediction tools for LOC and ROC."""
+import numpy as np
 from eeg_features import (
-    smooth_probability,
-    predict_gbc,
     __fun_LOC,
     __fun_ROC,
-    __objective_ROC,
-    __objective_LOC,
+    predict_gbc,
+    smooth_probability,
 )
-import numpy as np
-from matplotlib import pyplot as plt
-import pandas as pd
-import os.path as op
-from boost_loc_roc.archive.visualization import set_ax_setting, add_ax_vlines
 from scipy.optimize import least_squares
+
 
 def min_max_normalization(signal):
     """
@@ -20,7 +15,8 @@ def min_max_normalization(signal):
 
     Parameters
     ----------
-     signal : :obj:`list` or :obj:`pandas.core.series.Series` or :obj:`numpy.ndarray`
+     signal : :obj:`list` or :obj:`pandas.core.series.Series`
+      or :obj:`numpy.ndarray`
          Signal to process.
 
     Returns
@@ -34,6 +30,7 @@ def min_max_normalization(signal):
     signal = [(ele - min_signal) / diff_max_min_signal for ele in signal]
 
     return signal
+
 
 def least_square_pred(
     t,
@@ -62,7 +59,9 @@ def least_square_pred(
             t[t > (time_loc + min_dur_intervention * 60)],
             probability[t > (time_loc + min_dur_intervention * 60)],
         )
-        bounds = ([0.005, 0.5], [(time_loc + min_dur_intervention * 60), max(t)])
+        bounds = ([0.005, 0.5],
+                  [(time_loc + min_dur_intervention * 60), max(t)]
+                  )
 
     res_robust = least_squares(
         fun,
@@ -93,5 +92,5 @@ def predict_probabilities(model, X, min_max_norm=False):
         X.drop("epochs", inplace=True, axis=1)
     if min_max_norm:
         probabilities = np.array(min_max_normalization(probabilities))
-        
+
     return probabilities
