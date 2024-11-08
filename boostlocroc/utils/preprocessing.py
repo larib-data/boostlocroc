@@ -1,6 +1,8 @@
 """Preprocess EEG data.
 
 - truncate_fif: Remove artefacted data from a mne.Raw object.
+- detrend_and_reset_time: Reset time of a pandas.DataFrame and detrend one
+column.
 """
 import mne
 import numpy as np
@@ -50,3 +52,43 @@ def truncate_fif(raw, electrode=1):
     )
 
     return mne.io.RawArray(data, info)
+
+
+def detrend_and_reset_time(df, var="BIS/EEG1_WAV", new_name="EEG",
+                           trend_wind=300):
+    """
+    Detrends channel `var` of `df` DataFrame and and resets its time so it
+    starts at 0 seconds.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        The DataFrame containing the data. df is modified *in place*.
+        Must contain channels "Time" and `var`.
+    var: str
+        The name of the channel to detrend. Default is "BIS/EEG1_WAV".
+    new_name: str
+        The new name for the detrended channel. Default is "EEG".
+    trend_wind: int
+        The window size for the soft detrending. Default is 300.
+
+    Returns
+    -------
+    df: pandas.DataFrame
+        The modified DataFrame where time is reset,
+        channel `var` is replaced with its interpolation, and
+        the detrended channel is added with name `new_name`.
+    """
+    # Time reset
+    start = df["Time"].iloc[0]
+    df["Time"] = df["Time"] - start
+
+    # Soft detrend
+    dt = np.nanmedian(np.diff(df["Time"]))
+    df[var] = df[var].interpolate(method="linear")
+    window = int(trend_wind / dt)
+    trend = df[var].rolling(window=window, min_periods=1, center=True)
+    trend = trend.mean()
+    df[new_name] = df[var] - trend
+
+    return df
