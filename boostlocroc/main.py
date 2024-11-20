@@ -119,7 +119,7 @@ def extract_loc_roc(raw):
     # Pre-process data
     input_sample = compute_input_sample(raw).to_numpy()
     # Load onnx model
-    session = onx_make_session('boostlocroc/model_weights/voting_model.onnx')
+    session = onx_make_session()
     # Predict probabilities
     proba = onx_predict_proba(session, input_sample)
     proba = smooth_probability(proba)

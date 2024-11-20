@@ -7,12 +7,14 @@ sample.
 - onx_predict_proba: Predict probabilities using an onnx session.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from onnxruntime import InferenceSession
 
 
-def onx_make_session(path):
+def onx_make_session():
     """Make an onnx session from a model path to run it.
 
     Parameters
@@ -25,6 +27,7 @@ def onx_make_session(path):
     session: onnxruntime.InferenceSession
         Session to run the model.
     """
+    path = Path(__file__).parent.parent / "model_weights" / "voting_model.onnx"
     return InferenceSession(path, providers=["CPUExecutionProvider"])
 
 
