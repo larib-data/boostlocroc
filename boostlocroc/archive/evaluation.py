@@ -1,19 +1,19 @@
 """Evaluation of the model."""
-from .visualization import plot_pred, plot_zoom
-from tqdm.auto import tqdm
-from matplotlib import pyplot as plt
+import os.path as op
+
 import numpy as np
 import pandas as pd
-import os.path as op
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-from scipy.stats import t
-from matplotlib.pylab import rcParams
 import shap
+from matplotlib import pyplot as plt
+from matplotlib.pylab import rcParams
+from prediction import predict_loc_roc, predict_probabilities
 from scipy.interpolate import interp1d
+from scipy.stats import t
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from tqdm.auto import tqdm
 
 from .data import get_subject
-from prediction import predict_probabilities, predict_loc_roc
-
+from .visualization import plot_pred, plot_zoom
 
 params = {
     "figure.figsize": (20, 5),
@@ -444,7 +444,7 @@ def get_summary_stat(
         axis=1,
     )
 
-    metrics_df.to_csv((op.join(directory, f"metrics_{save_title}.csv")))
+    metrics_df.to_csv(op.join(directory, f"metrics_{save_title}.csv"))
 
     return metrics_df, (ic_loc_low, ic_loc_high), (ic_roc_low, ic_roc_high)
 
