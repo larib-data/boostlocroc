@@ -6,8 +6,9 @@ import pandas as pd
 from mne.io import read_raw
 from tqdm.auto import tqdm
 
-from ..eeg_features import raw_segmentation, smooth_psd
-from .data import get_labels
+from boostlocroc.archive.data import get_labels
+
+from boostlocroc.eeg_features import raw_segmentation, smooth_psd
 
 n_fft = 512  # hamming window duration (# time samples) 512=~8s at 63Hz
 n_overlap = 128

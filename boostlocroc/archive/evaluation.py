@@ -12,8 +12,8 @@ from scipy.stats import t
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from tqdm.auto import tqdm
 
-from .data import get_subject
-from .visualization import plot_pred, plot_zoom
+from boostlocroc.archive.data import get_subject
+from boostlocroc.archive.visualization import plot_pred, plot_zoom
 
 params = {
     "figure.figsize": (20, 5),

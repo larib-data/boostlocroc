@@ -94,27 +94,51 @@ def detrend_and_reset_time(df, var="BIS/EEG1_WAV", new_name="EEG",
     return df
 
 
+def check_and_rescale_units(filename, threshold=5, new_filename=None):
+    """
+    Check the units of the EEG signal and rescale if necessary.
 
+    Parameters
+    ----------
+    filename: str
+        Path to the input .fif file.
+    threshold: float, default=5
+        The threshold to determine if the units are in microvolts.
+        If the median of the absolute values of the signal exceeds this
+        threshold, the units are likely in microvolts and the signal is
+        rescaled to volts.
+    new_filename: str, default=None
+        Path to save the rescaled .fif file. If None, a default name is used.
 
-def filter_operation(df, raw, y_true, sfreq=63):
-    """Filter the EEG."""
-    parquet, (first, last) = __filter_df_between(df)
-    loc, roc = y_true
-    loc -= first / sfreq
-    roc -= first / sfreq
+    Returns
+    -------
+    res: str or None.
+        Path to the rescaled .fif file, if rescaling was performed.
+        None, if no rescaling was performed.
+    """
+    # Read the raw data
+    raw = mne.io.read_raw_fif(filename, preload=True)
 
-    raw = raw.copy().crop(first / sfreq, last / sfreq, include_tmax=False)
-    return (loc, roc), parquet, raw
+    # Compute the median of the absolute values of the signal
+    median_value = np.median(np.abs(raw._data))
+    # print(f"Median of absolute signal values: {median_value}")
 
+    # Check if the median value exceeds the threshold
+    if median_value > threshold:
+        print("The units are likely in microvolts. Rescaling to volts.")
 
-def __filter_df_between(df, low=-0.02, high=0.02):
-    """Filter the EEG when the device is already on."""
-    condition = (df < low) | (df > high)
-    condition = df[condition.all(axis=1)]
+        # Rescale the signal
+        raw._data *= 10**-6
 
-    valid_signal_index = (
-        df.index.get_loc(condition.first_valid_index()),
-        df.index.get_loc(condition.last_valid_index()),
-    )
+        # Define the new filename if not provided
+        if new_filename is None:
+            new_filename = filename.replace("_eeg.fif", "_rescaled_eeg.fif")
 
-    return df.iloc[valid_signal_index[0] : valid_signal_index[1]], valid_signal_index
+        # Save the rescaled data to a new file
+        raw.save(new_filename, overwrite=True)
+        print(f"Rescaled data saved to {new_filename}")
+
+        return new_filename
+    else:
+        print("The units are likely already in volts. No rescaling needed.")
+        return None
