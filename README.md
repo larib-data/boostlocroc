@@ -6,7 +6,7 @@ The detection is made by fitting an activation function to the outputs of the gr
 
 
 ## Installation
-First, ensure you have downloaded the boost-loc-roc folder containing this README and have an up-to-date version of ```pip```. To install the ```boostlocroc``` Python package, run the following command lines in a terminal:
+First, ensure you have downloaded the boostlocroc folder containing this README and have an up-to-date version of ```pip```. To install the ```boostlocroc``` Python package, run the following command lines in a terminal:
 ```
 cd <this_folder>
 pip install -e .
