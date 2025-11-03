@@ -1,5 +1,5 @@
 [project]
-name = "boost-loc-roc"
+name = "boostlocroc"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -11,8 +11,9 @@ dependencies = [
     "numpy>=1.26.4",
     "pandas>=2.2.3",
     "scikit-learn==1.3.2",
-    "scipy>=1.14.1",
+    "scipy>=1.11.1",
     "tqdm>=4.66.5",
+    "vitaldb>=1.4.1",
 ]
 
 [build-system]
