@@ -1,29 +1,41 @@
-[project]
+[tool.poetry]
 name = "boostlocroc"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.9"
-dependencies = [
-    "joblib>=1.4.2",
-    "matplotlib>=3.9.2",
-    "mne>=1.5.1",
-    "numpy>=1.26.4",
-    "pandas>=2.2.3",
-    "scikit-learn==1.3.2",
-    "scipy>=1.11.1",
-    "tqdm>=4.66.5",
-    "vitaldb>=1.4.1",
+description = "Detection of loss and return of consciousness from electro-encephalograms during general anesthesia"
+authors = [
+    "Virginie Loison <virg.loison@gmail.com>", 
+    "Orianne Saint Aubin <oriane.saintaubinhelle@aphp.fr>",
+    "Inès Khemiri <ikhemir@hotmail.fr>",
+    "Emilia Turc <emilia.turc@etu.u-paris.fr>",
+    "Jérôme Cartailler <jerome.cartailler@inserm.fr>"
 ]
+maintainer = [
+    "Virginie Loison <virg.loison@gmail.com>"
+]
+license = "BSD-3-Clause"
+readme = "README.md"
+requires-python = "^3.10"
+
+[tool.poetry.dependencies]
+joblib = "^1.4.2"
+matplotlib = "^3.9.2"
+mne = "^1.5.1"
+numpy = "^1.26.4"
+pandas = "^2.2.3"
+pytz = "^2020.1"
+scikit-learn = "^1.3.2"
+scipy = "^1.14.1"
+tqdm = "^4.66.5"
+vitaldb = "^1.4.1"
+ipython = "^8.27.0"
+ipykernel = "^6.7.0"
+onnxruntime = "^1.16.0"
+
+[tool.poetry.dev-dependencies]
+ruff= "^0.6.7"
+skl2onnx = "^1.16.0"
+pynacl = "^1.4.0"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["boostlocroc"]
-
-[tool.uv]
-dev-dependencies = [
-    "ruff>=0.6.7",
-]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
