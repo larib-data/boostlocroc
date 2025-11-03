@@ -1,1 +1,1 @@
-from .preprocessing import truncate_fif, detrend_and_reset_time
+from .preprocessing import check_and_rescale_units, detrend_and_reset_time, truncate_fif

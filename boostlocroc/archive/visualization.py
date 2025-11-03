@@ -1,16 +1,17 @@
 """Visualization module."""
+import os.path as op
+
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib.pylab import rcParams
 from sklearn.metrics import (
+    auc,
     confusion_matrix,
     roc_curve,
-    auc,
 )
 from sklearn.preprocessing import label_binarize
-import os.path as op
-from matplotlib import pyplot as plt
-import seaborn as sns
-from matplotlib.pylab import rcParams
 
 sfreq = 63
 
@@ -231,17 +232,17 @@ def make_confusion_matrix(
     blanks = ["" for i in range(cf.size)]
 
     if group_names and len(group_names) == cf.size:
-        group_labels = ["{}\n".format(value) for value in group_names]
+        group_labels = [f"{value}\n" for value in group_names]
     else:
         group_labels = blanks
 
     if count:
-        group_counts = ["{0:0.0f}\n".format(value) for value in cf_matrix.flatten()]
+        group_counts = [f"{value:0.0f}\n" for value in cf_matrix.flatten()]
     else:
         group_counts = blanks
 
     if percent:
-        group_percentages = ["{0:.2%}".format(value) for value in cf.flatten()]
+        group_percentages = [f"{value:.2%}" for value in cf.flatten()]
     else:
         group_percentages = blanks
 
@@ -262,11 +263,9 @@ def make_confusion_matrix(
             precision = cf_matrix[1, 1] / sum(cf_matrix[:, 1])
             recall = cf_matrix[1, 1] / sum(cf_matrix[1, :])
             f1_score = 2 * precision * recall / (precision + recall)
-            stats_text = "\n\nAccuracy={:0.4f}\nPrecision={:0.4f}\nRecall={:0.4f}\nF1 Score={:0.4f}".format(
-                accuracy, precision, recall, f1_score
-            )
+            stats_text = f"\n\nAccuracy={accuracy:0.4f}\nPrecision={precision:0.4f}\nRecall={recall:0.4f}\nF1 Score={f1_score:0.4f}"
         else:
-            stats_text = "\n\nAccuracy={:0.4f}".format(accuracy)
+            stats_text = f"\n\nAccuracy={accuracy:0.4f}"
     else:
         stats_text = ""
 
@@ -365,8 +364,7 @@ def display_roc_proba(
             plt.plot(
                 fpr[i],
                 tpr[i],
-                label="ROC curve of class {0} (area = {1:0.3f})"
-                "".format(i, roc_auc[i]),
+                label=f"ROC curve of class {i} (area = {roc_auc[i]:0.3f})",
             )
 
         plt.plot([0, 1], [0, 1], "k--")
@@ -383,11 +381,14 @@ def display_roc_proba(
 def display_precision_recall_curve(
     X_test, y_test, model, save_title=None, directory="images"
 ):
-    from sklearn.metrics import precision_recall_curve
-    from sklearn.metrics import average_precision_score
-    from sklearn.preprocessing import label_binarize
     from itertools import cycle
-    from sklearn.metrics import PrecisionRecallDisplay
+
+    from sklearn.metrics import (
+        PrecisionRecallDisplay,
+        average_precision_score,
+        precision_recall_curve,
+    )
+    from sklearn.preprocessing import label_binarize
 
 
     y_proba = model.predict_proba(X_test)
@@ -418,7 +419,7 @@ def display_precision_recall_curve(
         x = np.linspace(0.01, 1)
         y = f_score * x / (2 * x - f_score)
         (l,) = plt.plot(x[y >= 0], y[y >= 0], color="gray", alpha=0.2)
-        plt.annotate("f1={0:0.1f}".format(f_score), xy=(0.9, y[45] + 0.02))
+        plt.annotate(f"f1={f_score:0.1f}", xy=(0.9, y[45] + 0.02))
 
     display = PrecisionRecallDisplay(
         recall=recall["micro"],

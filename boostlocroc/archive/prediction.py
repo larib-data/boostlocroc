@@ -94,3 +94,28 @@ def predict_probabilities(model, X, min_max_norm=False):
         probabilities = np.array(min_max_normalization(probabilities))
 
     return probabilities
+
+
+def predict_loc_roc(
+    probability,
+    epochs_duration=30,
+    y_true=(0, 0),
+):
+    """Prediction LOC and ROC."""
+    # probability = probability["probabilities"].to_numpy()
+    L = len(probability)
+    t = np.linspace(0, L * epochs_duration, L)
+    min_dur_intervention = 0
+
+    time_loc = least_square_pred(
+        t, probability, min_dur_intervention=min_dur_intervention
+    )
+    time_roc = least_square_pred(
+        t,
+        probability,
+        mode="roc",
+        time_loc=time_loc,
+        min_dur_intervention=min_dur_intervention,
+    )
+
+    return time_loc, time_roc
