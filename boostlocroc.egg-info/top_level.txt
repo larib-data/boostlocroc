@@ -1,1 +1,1 @@
-boost_loc_roc
+boostlocroc

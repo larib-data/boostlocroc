@@ -1,10 +1,10 @@
 README.md
 pyproject.toml
 setup.py
-boost_loc_roc/__init__.py
-boost_loc_roc/eeg_features.py
-boost_loc_roc/main.py
-boost_loc_roc/vis.py
+boostlocroc/__init__.py
+boostlocroc/eeg_features.py
+boostlocroc/main.py
+boostlocroc/vis.py
 boostlocroc.egg-info/PKG-INFO
 boostlocroc.egg-info/SOURCES.txt
 boostlocroc.egg-info/dependency_links.txt
