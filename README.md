@@ -16,11 +16,13 @@ and follow the instructions. Once that's done, you can import and use the packag
 ## Quickstart
 See `quickstart.ipynb` on how to load the trained model on an EEG recording taken from the [VitalDB](https://vitaldb.net/) dataset. The expected data type is .fif.
 
+See `quickstart_vitaldb.ipynb` on how to load tracks from the [VitalDB](https://vitaldb.net/) dataset and load the trained model.
+
 ## Project structure
-The main functions are in the `boostlocroc/main.py` file. The code for extracting EEG features before applying the model is in the `boostlocroc/eeg_features.py` file. The code for visualization is in the `boostlocroc/vis.py` file. \
+The main functions are in the `boostlocroc/main.py` file. The code for preprocessing is in `boostlocroc.utils.preprocessing.py`. The code for extracting EEG features before applying the model is in the `boostlocroc.utils.eeg_features.py` file. The code for visualization is in the `boostlocroc/vis.py` file. \
 The `boostlocroc/model/` folder contains the models used for prediction. The ONNX model (`voting_model.onnx`) is primary and used off-the-shelf. The scikit-learn models are not used off-the-shelf and are kept for archival purposes.
 They could be helpful if you try to train your own model. \
-The `boostlocroc/archive/` folder contains code used for the [paper](https://ieeexplore.ieee.org/abstract/document/10199018) and is now deprecated. This code is just for information and is not expected to run smoothly if you run it. \
+The `boostlocroc/archive/` folder contains code used for the [paper](https://ieeexplore.ieee.org/abstract/document/10199018). The code in this folder is now deprecated. This code is just for information and is not expected to run smoothly if you run it. \
 
 ## Citing this work
 If this package was helpful to you, please cite it: \
